@@ -51,24 +51,48 @@ export default function RecommendationDetail() {
 
     const fetchRecommendation = async () => {
         try {
+            // 1. Fetch Recommendation + Action Plans (without nested evidence)
             const { data, error } = await supabase
                 .from('audit_recommendations')
                 .select(`
-          *,
-          departments (name),
-          action_plans (
-            *,
-            evidence_submissions (*)
-          )
-        `)
+                  *,
+                  departments (name),
+                  action_plans (*)
+                `)
                 .eq('id', id)
                 .single();
 
             if (error) throw error;
-            if (data.action_plans) {
-                data.action_plans.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+            let enhancedActionPlans: any[] = data.action_plans || [];
+
+            // 2. Sort Action Plans
+            if (enhancedActionPlans.length > 0) {
+                enhancedActionPlans.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+                // 3. Fetch Evidence separately using action_plan_ids
+                const planIds = enhancedActionPlans.map(p => p.id);
+                const { data: evidenceData, error: evidenceError } = await supabase
+                    .from('evidence_submissions')
+                    .select('*')
+                    .in('action_plan_id', planIds);
+
+                if (evidenceError) {
+                    console.error('Error fetching evidence:', evidenceError);
+                } else {
+                    // 4. Attach evidence to respective action plans
+                    enhancedActionPlans = enhancedActionPlans.map(plan => ({
+                        ...plan,
+                        evidence_submissions: evidenceData ? evidenceData.filter(e => e.action_plan_id === plan.id) : []
+                    }));
+                }
             }
-            setRecommendation(data);
+
+            // 5. Update State
+            setRecommendation({
+                ...data,
+                action_plans: enhancedActionPlans
+            });
 
             if (data.created_by) {
                 fetchAuditor(data.created_by);
@@ -306,8 +330,8 @@ export default function RecommendationDetail() {
     const renderGeneralInfo = () => (
         <ScrollView style={styles.contentContainer}>
             <View style={styles.header}>
-                <View style={[styles.statusBadge, { backgroundColor: AuditStatusColors[recommendation.status as keyof typeof AuditStatusColors] }]}>
-                    <Text style={styles.statusText}>{recommendation.status.toUpperCase()}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: AuditStatusColors[(recommendation.status || 'Blue') as keyof typeof AuditStatusColors] || '#6B7280' }]}>
+                    <Text style={styles.statusText}>{(recommendation.status || 'Unknown').toUpperCase()}</Text>
                 </View>
                 {isAuditorOrDirector && (
                     <TouchableOpacity onPress={() => setStatusModalVisible(true)} style={styles.updateStatusBtn}>
@@ -375,7 +399,7 @@ export default function RecommendationDetail() {
                                         <Text style={[styles.planStatusText, {
                                             color: plan.status === 'completed' ? '#059669' :
                                                 plan.status === 'in_progress' ? '#D97706' : '#4B5563'
-                                        }]}>{plan.status.replace('_', ' ').toUpperCase()}</Text>
+                                        }]}>{(plan.status || 'pending').replace('_', ' ').toUpperCase()}</Text>
                                     </View>
 
                                     {plan.due_date && (
