@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: '#F9FAFB',
+        backgroundColor: 'white', // Changed from #F9FAFB to White for cleaner look
         borderTopLeftRadius: 28,
         borderTopRightRadius: 28,
         // No padding here, handled in children to allow full width header
@@ -484,10 +484,10 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
     },
     recListContainer: {
-        backgroundColor: 'white',
+        backgroundColor: '#F9FAFB', // Slightly grey background for list container
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: '#D1D5DB', // Darker border
         overflow: 'hidden',
     },
     recItem: {
@@ -495,7 +495,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 14,
         borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        borderBottomColor: '#E5E7EB',
+        backgroundColor: 'white', // Items are white
     },
     recItemActive: {
         backgroundColor: '#EFF6FF',
@@ -505,7 +506,7 @@ const styles = StyleSheet.create({
         height: 20,
         borderRadius: 10,
         borderWidth: 1.5,
-        borderColor: '#D1D5DB',
+        borderColor: '#9CA3AF', // Darker default border
         marginRight: 12,
         alignItems: 'center',
         justifyContent: 'center',
@@ -513,6 +514,7 @@ const styles = StyleSheet.create({
     recIconActive: {
         backgroundColor: Colors.light.primary,
         borderColor: Colors.light.primary,
+        borderWidth: 0,
     },
     recItemText: {
         fontSize: 14,
@@ -522,11 +524,11 @@ const styles = StyleSheet.create({
         lineHeight: 20,
     },
     recItemTextActive: {
-        color: '#111827',
-        fontWeight: '600',
+        color: '#1E3A8A', // Blue text when active
+        fontWeight: '700',
     },
     textArea: {
-        backgroundColor: 'white',
+        backgroundColor: '#F3F4F6', // Distinct light grey background for input
         borderWidth: 1,
         borderColor: '#E5E7EB',
         borderRadius: 12,
@@ -544,7 +546,7 @@ const styles = StyleSheet.create({
     dateInputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'white',
+        backgroundColor: '#F3F4F6', // Distinct light grey background for input
         borderWidth: 1,
         borderColor: '#E5E7EB',
         borderRadius: 12,
@@ -559,7 +561,7 @@ const styles = StyleSheet.create({
     },
     helperText: {
         fontSize: 12,
-        color: '#9CA3AF',
+        color: '#6B7280', // Darker gray for readability
         marginTop: 6,
         marginLeft: 4,
     },
@@ -582,7 +584,7 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     submitButtonDisabled: {
-        backgroundColor: '#9CA3AF',
+        backgroundColor: '#CBD5E1', // Lighter grey for disabled state
         shadowOpacity: 0,
         elevation: 0,
     },
