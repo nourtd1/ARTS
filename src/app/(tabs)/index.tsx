@@ -28,11 +28,24 @@ export default function DashboardScreen() {
   const router = useRouter();
 
   const { data: stats, isLoading, refetch } = useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', profile?.id],
+    enabled: !!profile,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('audit_recommendations')
         .select('status');
+
+      // ENFORCE RLS (Client-side filtering for stats)
+      // Note: Ideally proper RLS policies on Supabase prevent fetching, but we filter here for UI consistency
+      if (profile && profile.role !== 'auditor' && profile.role !== 'director') {
+        if (profile.department_id) {
+          query = query.eq('department_id', profile.department_id);
+        } else {
+          return { Green: 0, Yellow: 0, Red: 0, Purple: 0 };
+        }
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 

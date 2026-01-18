@@ -18,6 +18,7 @@ type Recommendation = Database['public']['Tables']['audit_recommendations']['Row
 };
 
 type AuditorProfile = Database['public']['Tables']['profiles']['Row'];
+type StaffProfile = Database['public']['Tables']['profiles']['Row'];
 
 export default function RecommendationDetail() {
     const { id } = useLocalSearchParams();
@@ -32,6 +33,8 @@ export default function RecommendationDetail() {
     const [actionModalVisible, setActionModalVisible] = useState(false);
     const [newPlanDesc, setNewPlanDesc] = useState('');
     const [newPlanDate, setNewPlanDate] = useState('');
+    const [staffList, setStaffList] = useState<StaffProfile[]>([]);
+    const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
     const [submittingAction, setSubmittingAction] = useState(false);
 
     // Evidence Modal State
@@ -97,11 +100,25 @@ export default function RecommendationDetail() {
             if (data.created_by) {
                 fetchAuditor(data.created_by);
             }
+
+            // 6. Fetch Staff for the department (if user is focal person)
+            if (data.department_id) {
+                fetchStaffResult(data.department_id);
+            }
         } catch (e) {
             console.error(e);
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchStaffResult = async (deptId: string) => {
+        const { data } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('department_id', deptId)
+            .eq('role', 'staff');
+        if (data) setStaffList(data);
     };
 
     const fetchAuditor = async (userId: string) => {
@@ -130,7 +147,7 @@ export default function RecommendationDetail() {
             const { error } = await supabase.from('action_plans').insert({
                 recommendation_id: recommendation.id,
                 description: newPlanDesc,
-                assigned_to: profile?.id,
+                assigned_to: selectedStaffId || profile?.id, // Assign to selected staff OR self
                 due_date: newPlanDate ? new Date(newPlanDate).toISOString() : null,
                 status: 'pending'
             });
@@ -139,6 +156,7 @@ export default function RecommendationDetail() {
 
             setNewPlanDesc('');
             setNewPlanDate('');
+            setSelectedStaffId(null);
             setActionModalVisible(false);
             fetchRecommendation();
             Alert.alert('Success', 'Action plan added successfully');
@@ -559,6 +577,37 @@ export default function RecommendationDetail() {
                                 placeholderTextColor="#9CA3AF"
                             />
                         </View>
+
+                        {/* Staff Selection for Focal Persons */}
+                        {profile?.role === 'focal_person' && (
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Assign to Staff (Optional)</Text>
+                                {staffList.length > 0 ? (
+                                    <ScrollView style={{ maxHeight: 100 }} nestedScrollEnabled>
+                                        {staffList.map(staff => (
+                                            <TouchableOpacity
+                                                key={staff.id}
+                                                style={[
+                                                    styles.planSelectionItem,
+                                                    selectedStaffId === staff.id && styles.planSelectionItemActive
+                                                ]}
+                                                onPress={() => setSelectedStaffId(staff.id)}
+                                            >
+                                                <Text style={[
+                                                    styles.planSelectionText,
+                                                    selectedStaffId === staff.id && styles.planSelectionTextActive
+                                                ]}>
+                                                    {staff.full_name || staff.id}
+                                                </Text>
+                                                {selectedStaffId === staff.id && <Check size={16} color={Colors.light.primary} />}
+                                            </TouchableOpacity>
+                                        ))}
+                                    </ScrollView>
+                                ) : (
+                                    <Text style={{ fontStyle: 'italic', color: '#9CA3AF' }}>No staff found in this department.</Text>
+                                )}
+                            </View>
+                        )}
 
                         <TouchableOpacity
                             style={styles.submitButton}

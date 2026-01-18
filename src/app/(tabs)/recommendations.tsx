@@ -1,5 +1,6 @@
 import { Text, View } from '@/components/Themed';
 import { AuditStatusColors, Colors } from '@/constants/Colors';
+import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/services/supabase';
 import { Database } from '@/types/database.types';
 import { useQuery } from '@tanstack/react-query';
@@ -19,8 +20,11 @@ export default function RecommendationsScreen() {
 
     // Debounce search could be added here, but for simplicity relying on state update
 
+    const { profile, loading: authLoading } = useAuth();
+
     const { data: recommendations, isLoading, error } = useQuery({
-        queryKey: ['recommendations', filter, searchQuery],
+        queryKey: ['recommendations', filter, searchQuery, profile?.id],
+        enabled: !authLoading && !!profile,
         queryFn: async () => {
             let query = supabase
                 .from('audit_recommendations')
@@ -30,6 +34,16 @@ export default function RecommendationsScreen() {
           action_plans (due_date)
         `)
                 .order('created_at', { ascending: false });
+
+            // ENFORCE ROLE-BASED ACCESS CONTROL
+            if (profile && profile.role !== 'auditor' && profile.role !== 'director') {
+                if (profile.department_id) {
+                    query = query.eq('department_id', profile.department_id);
+                } else {
+                    // If no department assigned, show nothing or handle gracefully
+                    return [];
+                }
+            }
 
             if (filter !== 'all') {
                 query = query.eq('status', filter);
