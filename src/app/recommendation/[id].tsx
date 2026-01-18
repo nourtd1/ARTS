@@ -8,7 +8,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Calendar, Check, CheckCircle2, FileText, Plus, RefreshCw, Shield, Upload, User, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Linking, Modal, Platform, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Linking, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
 type Recommendation = Database['public']['Tables']['audit_recommendations']['Row'] & {
     departments: { name: string } | null;
@@ -66,7 +66,7 @@ export default function RecommendationDetail() {
 
             if (error) throw error;
             if (data.action_plans) {
-                data.action_plans.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                data.action_plans.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
             }
             setRecommendation(data);
 
@@ -654,5 +654,419 @@ export default function RecommendationDetail() {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#F9FAFB',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        backgroundColor: '#FFFFFF',
+        paddingHorizontal: 16,
+        paddingBottom: 0,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
+    },
+    tabButton: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderBottomWidth: 2,
+        borderBottomColor: 'transparent',
+    },
+    tabButtonActive: {
+        borderBottomColor: Colors.light.primary,
+    },
+    tabText: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#6B7280',
+    },
+    tabTextActive: {
+        color: Colors.light.primary,
+        fontWeight: '600',
+    },
+    contentContainer: {
+        flex: 1,
+        padding: 20,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    statusBadge: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        alignSelf: 'flex-start',
+    },
+    statusText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    updateStatusBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#EFF6FF',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    updateStatusText: {
+        color: Colors.light.primary,
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    dateText: {
+        fontSize: 12,
+        color: '#6B7280',
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#111827',
+        marginBottom: 16,
+        lineHeight: 28,
+    },
+    card: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    cardLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#6B7280',
+        marginBottom: 8,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    description: {
+        fontSize: 15,
+        color: '#374151',
+        lineHeight: 24,
+    },
+    row: {
+        flexDirection: 'row',
+        gap: 16,
+    },
+    infoCard: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 16,
+        alignItems: 'flex-start',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    infoLabel: {
+        fontSize: 12,
+        color: '#6B7280',
+        marginBottom: 4,
+    },
+    infoValue: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#111827',
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#111827',
+    },
+    addButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#EFF6FF',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    addButtonText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.light.primary,
+    },
+    planCard: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    planHeader: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    pendingCircle: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 2,
+        marginRight: 12,
+    },
+    planDesc: {
+        fontSize: 15,
+        color: '#111827',
+        marginBottom: 8,
+        lineHeight: 22,
+    },
+    completedText: {
+        color: '#9CA3AF',
+        textDecorationLine: 'line-through',
+    },
+    planMetaRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    planStatusBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    planStatusText: {
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    planMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    planDate: {
+        fontSize: 12,
+        color: '#6B7280',
+    },
+    emptyState: {
+        padding: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    emptyText: {
+        color: '#9CA3AF',
+        fontSize: 14,
+    },
+    evidenceCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    evidenceTitle: {
+        fontSize: 12,
+        color: '#6B7280',
+        fontWeight: '600',
+        marginBottom: 2,
+    },
+    evidenceLink: {
+        fontSize: 14,
+        color: '#111827',
+        fontWeight: '500',
+        marginBottom: 2,
+    },
+    evidenceDate: {
+        fontSize: 12,
+        color: '#9CA3AF',
+    },
+    evidenceActions: {
+        flexDirection: 'row',
+        gap: 8,
+        marginLeft: 12,
+    },
+    actionBtn: {
+        padding: 8,
+        borderRadius: 8,
+    },
+    timelineItem: {
+        flexDirection: 'row',
+        marginBottom: 0,
+    },
+    timelineLine: {
+        width: 2,
+        backgroundColor: '#E5E7EB',
+        marginHorizontal: 14,
+        position: 'relative',
+    },
+    timelineDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: Colors.light.primary,
+        position: 'absolute',
+        left: -4,
+        top: 6,
+    },
+    timelineContent: {
+        flex: 1,
+        paddingBottom: 24,
+    },
+    timelineTitle: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#111827',
+        marginBottom: 2,
+    },
+    timelineUser: {
+        fontSize: 13,
+        color: '#4B5563',
+        marginBottom: 2,
+    },
+    timelineDate: {
+        fontSize: 12,
+        color: '#9CA3AF',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#FFFFFF',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        padding: 24,
+        paddingBottom: 40,
+        maxHeight: '90%',
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#111827',
+    },
+    inputGroup: {
+        marginBottom: 20,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#374151',
+        marginBottom: 8,
+    },
+    textArea: {
+        backgroundColor: '#F9FAFB',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: 12,
+        padding: 12,
+        height: 100,
+        textAlignVertical: 'top',
+        fontSize: 15,
+        color: '#111827',
+    },
+    input: {
+        backgroundColor: '#F9FAFB',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: 12,
+        padding: 12,
+        fontSize: 15,
+        color: '#111827',
+    },
+    submitButton: {
+        backgroundColor: Colors.light.primary,
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    submitButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#FFFFFF',
+    },
+    planSelectionItem: {
+        padding: 12,
+        borderRadius: 8,
+        backgroundColor: '#F3F4F6',
+        marginBottom: 8,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    planSelectionItemActive: {
+        backgroundColor: '#EFF6FF',
+        borderColor: Colors.light.primary,
+    },
+    planSelectionText: {
+        fontSize: 14,
+        color: '#4B5563',
+    },
+    planSelectionTextActive: {
+        color: Colors.light.primary,
+        fontWeight: '500',
+    },
+    fileButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#D1D5DB',
+        borderStyle: 'dashed',
+        borderRadius: 12,
+        padding: 24,
+        marginBottom: 24,
+        backgroundColor: '#F9FAFB',
+    },
+    fileButtonText: {
+        marginLeft: 8,
+        fontSize: 14,
+        color: '#6B7280',
+    },
+    statusOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        backgroundColor: '#F9FAFB',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    statusOptionActive: {
+        backgroundColor: '#EFF6FF',
+        borderColor: Colors.light.primary,
+    },
+    statusDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        marginRight: 12,
+    },
+    statusOptionText: {
+        fontSize: 15,
+        fontWeight: '500',
+        color: '#111827',
+        flex: 1,
+    },
+});
 
 
